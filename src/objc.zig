@@ -8,9 +8,6 @@ pub const IMP = *const anyopaque;
 
 // https://github.com/hazeycode/zig-objcrt/blob/main/src/message.zig#L16
 pub fn msgSend(comptime ReturnType: type, target: anytype, sel: SEL, args: anytype) ReturnType {
-    const target_type = @TypeOf(target);
-    if ((target_type == id or target_type == Class) == false) @compileError("msgSend target should be of type id or Class");
-
     const args_meta = @typeInfo(@TypeOf(args)).Struct.fields;
     const FnType = blk: {
         {
@@ -30,6 +27,10 @@ pub fn msgSend(comptime ReturnType: type, target: anytype, sel: SEL, args: anyty
     var func = @ptrCast(FnType, c.objc_msgSend);
 
     return @call(.{}, func, .{ target, sel } ++ args);
+}
+
+pub fn class(str: [:0]const u8) Class {
+    return c.objc_lookUpClass(str).?;
 }
 
 pub fn selector(str: [:0]const u8) SEL {
