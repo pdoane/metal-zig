@@ -1,6 +1,8 @@
 const std = @import("std");
+const path = std.fs.path;
+const Builder = std.build.Builder;
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *Builder) !void {
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
@@ -11,7 +13,7 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("zig", "src/main.zig");
+    const exe = b.addExecutable("metal-zig", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.linkFramework("CoreFoundation");
@@ -37,4 +39,48 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+
+    try addMetalShader(b, exe, "add.metal", "add.air");
+    try addMetalLibrary(b, exe, "add.air", "default.metallib");
+}
+
+fn addMetalShader(b: *Builder, exe: anytype, in_file: []const u8, out_file: []const u8) !void {
+    // example:
+    // xcrun -sdk macosx metal -c add.metal -o add.air
+    const dirname = "shaders";
+    const full_in = try path.join(b.allocator, &[_][]const u8{ dirname, in_file });
+    const full_out = try path.join(b.allocator, &[_][]const u8{ dirname, out_file });
+
+    const run_cmd = b.addSystemCommand(&[_][]const u8{
+        "xcrun",
+        "-sdk",
+        "macosx",
+        "metal",
+        "-c",
+        full_in,
+        "-o",
+        full_out,
+    });
+    exe.step.dependOn(&run_cmd.step);
+}
+
+fn addMetalLibrary(b: *Builder, exe: anytype, in_file: []const u8, out_file: []const u8) !void {
+    // example:
+    // xcrun -sdk macosx metallib add.air -o default.metallib
+
+    // TODO - support array of files
+    const dirname = "shaders";
+    const full_in = try path.join(b.allocator, &[_][]const u8{ dirname, in_file });
+    const full_out = try path.join(b.allocator, &[_][]const u8{ dirname, out_file });
+
+    const run_cmd = b.addSystemCommand(&[_][]const u8{
+        "xcrun",
+        "-sdk",
+        "macosx",
+        "metallib",
+        full_in,
+        "-o",
+        full_out,
+    });
+    exe.step.dependOn(&run_cmd.step);
 }
