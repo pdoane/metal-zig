@@ -35,7 +35,8 @@ pub fn main() !void {
     var input_buffer = device.newBufferWithBytes_length_options(&input, @sizeOf(f32) * 2) orelse {
         std.log.err("newBufferWithBytes_length_options failed", .{});
         return;
-    }
+    };
+    
     var output_buffer = device.newBufferWithLength_options(@sizeOf(f32)) orelse {
         std.log.err("newBufferWithLength_options failed", .{});
         return;
