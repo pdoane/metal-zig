@@ -1,27 +1,29 @@
 const std = @import("std");
-const objc = @import("objc.zig");
-const ns = @import("ns.zig");
+const foundation = @import("foundation");
+
+const objc = foundation.objc;
+const ns = foundation.ns;
 
 extern fn MTLCreateSystemDefaultDevice() objc.id;
 
-var sel_commandBuffer : objc.SEL = undefined;
-var sel_commit : objc.SEL = undefined;
-var sel_computeCommandEncoder : objc.SEL = undefined;
-var sel_contents : objc.SEL = undefined;
-var sel_dispatchThreadgroups_threadsPerThreadgroup_ : objc.SEL = undefined;
-var sel_endEncoding : objc.SEL = undefined;
-var sel_name : objc.SEL = undefined;
-var sel_newBufferWithBytes_length_options_ : objc.SEL = undefined;
-var sel_newBufferWithLength_options_ : objc.SEL = undefined;
-var sel_newCommandQueue : objc.SEL = undefined;
-var sel_newComputePipelineStateWithFunction_error_  : objc.SEL = undefined;
-var sel_newFunctionWithName_ : objc.SEL = undefined;
-var sel_newLibraryWithFile_error_ : objc.SEL = undefined;
-var sel_setBuffer_offset_atIndex_ : objc.SEL = undefined;
-var sel_setComputePipelineState_ : objc.SEL = undefined;
-var sel_waitUntilCompleted : objc.SEL = undefined;
+var sel_commandBuffer: objc.SEL = undefined;
+var sel_commit: objc.SEL = undefined;
+var sel_computeCommandEncoder: objc.SEL = undefined;
+var sel_contents: objc.SEL = undefined;
+var sel_dispatchThreadgroups_threadsPerThreadgroup_: objc.SEL = undefined;
+var sel_endEncoding: objc.SEL = undefined;
+var sel_name: objc.SEL = undefined;
+var sel_newBufferWithBytes_length_options_: objc.SEL = undefined;
+var sel_newBufferWithLength_options_: objc.SEL = undefined;
+var sel_newCommandQueue: objc.SEL = undefined;
+var sel_newComputePipelineStateWithFunction_error_: objc.SEL = undefined;
+var sel_newFunctionWithName_: objc.SEL = undefined;
+var sel_newLibraryWithFile_error_: objc.SEL = undefined;
+var sel_setBuffer_offset_atIndex_: objc.SEL = undefined;
+var sel_setComputePipelineState_: objc.SEL = undefined;
+var sel_waitUntilCompleted: objc.SEL = undefined;
 
-pub fn init() void {
+pub fn _init() void {
     sel_commandBuffer = objc.selector("commandBuffer");
     sel_commit = objc.selector("commit");
     sel_computeCommandEncoder = objc.selector("computeCommandEncoder");
@@ -134,13 +136,13 @@ pub const ComputeCommandEncoder = opaque {
     // dispatchType
 
     pub fn setComputePipelineState(self: *ComputeCommandEncoder, state: *ComputePipelineState) void {
-        objc.msgSend(void, self, sel_setComputePipelineState_, .{ state });
+        objc.msgSend(void, self, sel_setComputePipelineState_, .{state});
     }
 
     // setBytes
 
     pub fn setBuffer_offset_atIndex(self: *ComputeCommandEncoder, buffer: ?*Buffer, offset: ns.UInteger, atIndex: ns.UInteger) void {
-        objc.msgSend(void, self, sel_setBuffer_offset_atIndex_, .{ buffer, offset, atIndex });        
+        objc.msgSend(void, self, sel_setBuffer_offset_atIndex_, .{ buffer, offset, atIndex });
     }
 
     // setBufferOffset
@@ -192,9 +194,7 @@ pub const CommandQueue = opaque {
     // insertDebugCaptureBoundary
 };
 
-pub const ComputePipelineState = opaque {
-
-};
+pub const ComputePipelineState = opaque {};
 
 pub const Device = opaque {
     pub fn name(self: *Device) *ns.String {
@@ -235,7 +235,7 @@ pub const Device = opaque {
 
     // TODO - ResourceOptions
     pub fn newBufferWithLength_options(self: *Device, length: ns.UInteger) ?*Buffer {
-        const options: ns.UInteger  = 0;
+        const options: ns.UInteger = 0;
         return objc.msgSend(*Buffer, self, sel_newBufferWithLength_options_, .{ length, options });
     }
 
