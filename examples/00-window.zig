@@ -1,7 +1,8 @@
 const std = @import("std");
-const objc = @import("objc.zig");
-const ns = @import("ns.zig");
-const mtl = @import("mtl.zig");
+const metal_zig = @import("metal-zig");
+const objc = metal_zig.objc;
+const ns = metal_zig.ns;
+const mtl = metal_zig.mtl;
 
 pub fn main() void {
     ns.init();
