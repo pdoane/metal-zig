@@ -248,69 +248,40 @@ pub const WindowStyleMaskHUDWindow : UInteger = ( 1 << 13 );
 
 pub const Application = opaque {
     const Self = @This();
-    
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
 
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Application methods
     pub fn sharedApplication() *Application {
         return objc.msgSend(*Application, class_NSApplication, sel_sharedApplication, .{});
     }
 
-    pub fn setDelegate(self: *Self, del: ApplicationDelegate) void {
-        const wrapper = Value.valueWithPointer(&del);
-        objc.msgSend(void, self, sel_setDelegate_, .{ wrapper });
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn setDelegate(self: *T, del: ApplicationDelegate) void {
+                const wrapper = Value.valueWithPointer(&del);
+                objc.msgSend(void, self, sel_setDelegate_, .{ wrapper });
+            }
 
-    pub fn setActivationPolicy(self: *Self, activationPolicy: ActivationPolicy) bool {
-        return objc.msgSend(bool, self, sel_setActivationPolicy_, .{ activationPolicy });
-    }
+            pub fn setActivationPolicy(self: *T, activationPolicy: ActivationPolicy) bool {
+                return objc.msgSend(bool, self, sel_setActivationPolicy_, .{ activationPolicy });
+            }
 
-    pub fn activateIgnoringOtherApps(self: *Self, ignoreOtherApps: bool) void {
-        objc.msgSend(void, self, sel_activateIgnoringOtherApps_, .{ ignoreOtherApps });
-    }
+            pub fn activateIgnoringOtherApps(self: *T, ignoreOtherApps: bool) void {
+                objc.msgSend(void, self, sel_activateIgnoringOtherApps_, .{ ignoreOtherApps });
+            }
 
-    pub fn setMainMenu(self: *Self, menu: *Menu) void {
-        objc.msgSend(void, self, sel_setMainMenu_, .{ menu });
-    }
+            pub fn setMainMenu(self: *T, menu: *Menu) void {
+                objc.msgSend(void, self, sel_setMainMenu_, .{ menu });
+            }
 
-    pub fn run(self: *Self) void {
-        objc.msgSend(void, self, sel_run, .{});
-    }
+            pub fn run(self: *T) void {
+                objc.msgSend(void, self, sel_run, .{});
+            }
 
-    pub fn terminate(self: *Self, sender: *Object) void {
-        objc.msgSend(void, self, sel_terminate_, .{ sender });
+            pub fn terminate(self: *T, sender: *Object) void {
+                objc.msgSend(void, self, sel_terminate_, .{ sender });
+            }
+        };
     }
 };
 
@@ -337,47 +308,9 @@ fn applicationShouldTerminateAfterLastWindowClosedThunk(self: *Value, _: objc.SE
 
 pub const Array = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
     
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Copying methods
-    pub fn copy(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_copy, .{});
-    }
-
-    // Array methods
     pub fn array() *Array {
         return objc.msgSend(*Array, class_NSArray, sel_array, .{});
     }
@@ -392,169 +325,67 @@ pub const Array = opaque {
         return objc.msgSend(*Array, class_NSArray, sel_alloc, .{});
     }
 
-    pub fn init(self: *Self) *Array {
-        return objc.msgSend(*Array, self, sel_init, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn init(self: *T) *T {
+                return objc.msgSend(*T, self, sel_init, .{});
+            }
 
-    // initWithObjects_count
+            // initWithObjects_count
 
-    pub fn count(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_count);
-    }
+            pub fn count(self: *T) UInteger {
+                return objc.msgSend(UInteger, self, sel_count);
+            }
 
-    pub fn objectAtIndex(self: *Self, comptime ReturnType: type, index: UInteger) *ReturnType {
-        return objc.msgSend(*ReturnType, self, sel_objectAtIndex_, .{ index });
+            pub fn objectAtIndex(self: *T, comptime ReturnType: type, index: UInteger) *ReturnType {
+                return objc.msgSend(*ReturnType, self, sel_objectAtIndex_, .{ index });
+            }
+        };
     }
 };
 
 pub const AutoreleasePool = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
 
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // AutoreleasePool methods
     pub fn alloc() *AutoreleasePool {
         return objc.msgSend(*AutoreleasePool, class_NSAutoreleasePool, sel_alloc, .{});
     }
 
-    pub fn init(self: *Self) *AutoreleasePool {
-        return objc.msgSend(*AutoreleasePool, self, sel_init, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn init(self: *T) *T {
+                return objc.msgSend(*T, self, sel_init, .{});
+            }
 
-    pub fn drain(self: *Self) void {
-        objc.msgSend(void, self, sel_drain, .{});
-    }
+            pub fn drain(self: *T) void {
+                objc.msgSend(void, self, sel_drain, .{});
+            }
 
-    pub fn addObject(self: *Self, object: *Object) void {
-        objc.msgSend(void, self, sel_addObject_, .{ object });
-    }
+            pub fn addObject(self: *T, object: *Object) void {
+                objc.msgSend(void, self, sel_addObject_, .{ object });
+            }
 
-    pub fn showPools(self: *Self) void {
-        objc.msgSend(void, self, sel_showPools, .{});
+            pub fn showPools(self: *T) void {
+                objc.msgSend(void, self, sel_showPools, .{});
+            }
+        };
     }
 };
 
 pub const Dictionary = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
 
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Copying methods
-    pub fn copy(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_copy, .{});
-    }
-
-    // Dictionary methods
     // TODO
 };
 
 pub const Error = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
 
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Copying methods
-    pub fn copy(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_copy, .{});
-    }
-
-    // Error methods
     pub fn errorWithDomain_code_userInfo(domain_: ErrorDomain, code_: Integer, userInfo_: *Dictionary) *Error {
         return objc.msgSend(*Error, class_NSError, sel_errorWithDomain_code_userInfo_, .{ domain_, code_, userInfo_ });
     }
@@ -563,140 +394,82 @@ pub const Error = opaque {
         return objc.msgSend(*Error, class_NSError, sel_alloc, .{});
     }
 
-    pub fn init(self: *Self) *Error {
-        return objc.msgSend(*Error, self, sel_init, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn init(self: *T) *T {
+                return objc.msgSend(*Error, self, sel_init, .{});
+            }
 
-    pub fn initWithDomain_code_userInfo(self: *Self, domain_: ErrorDomain, code_: Integer, userInfo_: *Dictionary) *Error {
-        return objc.msgSend(*Error, self, sel_initWithDomain_code_userInfo_, .{ domain_, code_, userInfo_ });
-    }
+            pub fn initWithDomain_code_userInfo(self: *T, domain_: ErrorDomain, code_: Integer, userInfo_: *Dictionary) *T {
+                return objc.msgSend(*T, self, sel_initWithDomain_code_userInfo_, .{ domain_, code_, userInfo_ });
+            }
 
-    pub fn code(self: *Self) Integer {
-        return objc.msgSend(Integer, self, sel_code, .{});
-    }
+            pub fn code(self: *T) Integer {
+                return objc.msgSend(Integer, self, sel_code, .{});
+            }
 
-    pub fn domain(self: *Self) ErrorDomain {
-        return objc.msgSend(ErrorDomain, self, sel_domain, .{});
-    }
+            pub fn domain(self: *T) ErrorDomain {
+                return objc.msgSend(ErrorDomain, self, sel_domain, .{});
+            }
 
-    pub fn userInfo(self: *Self) *Dictionary {
-        return objc.msgSend(*Dictionary, self, sel_userInfo, .{});
-    }
+            pub fn userInfo(self: *T) *Dictionary {
+                return objc.msgSend(*Dictionary, self, sel_userInfo, .{});
+            }
 
-    pub fn localizedDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_localizedDescription, .{});
-    }
+            pub fn localizedDescription(self: *T) *String {
+                return objc.msgSend(*String, self, sel_localizedDescription, .{});
+            }
 
-    pub fn localizedRecoveryOptions(self: *Self) *Array {
-        return objc.msgSend(*Array, self, sel_localizedRecoveryOptions, .{});
-    }
+            pub fn localizedRecoveryOptions(self: *T) *Array {
+                return objc.msgSend(*Array, self, sel_localizedRecoveryOptions, .{});
+            }
 
-    pub fn localizedRecoverySuggestion(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_localizedRecoverySuggestion, .{});
-    }
+            pub fn localizedRecoverySuggestion(self: *T) *String {
+                return objc.msgSend(*String, self, sel_localizedRecoverySuggestion, .{});
+            }
 
-    pub fn localizedFailureReason(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_localizedFailureReason, .{});
+            pub fn localizedFailureReason(self: *T) *String {
+                return objc.msgSend(*String, self, sel_localizedFailureReason, .{});
+            }
+        };
     }
 };
 
 pub const Menu = opaque {
     const Self = @This();
-    
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
 
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Menu methods
     pub fn alloc() *Menu {
         return objc.msgSend(*Menu, class_NSMenu, sel_alloc, .{});
     }
 
-    pub fn init(self: *Self) *Menu {
-        return objc.msgSend(*Self, self, sel_init, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn init(self: *T) *T {
+                return objc.msgSend(*T, self, sel_init, .{});
+            }
 
-    pub fn initWithTitle(self: *Self, title: *String) *Menu {
-        return objc.msgSend(*Self, self, sel_initWithTitle_, .{ title });
-    }
+            pub fn initWithTitle(self: *T, title: *String) *T {
+                return objc.msgSend(*T, self, sel_initWithTitle_, .{ title });
+            }
 
-    pub fn addItemWithTitle_action_keyEquivalent(self: *Self, title: *String, selector: objc.SEL, keyEquivalent: *String) *MenuItem {
-        return objc.msgSend(*MenuItem, self, sel_addItemWithTitle_action_keyEquivalent_, .{ title, selector, keyEquivalent });
-    }
+            pub fn addItemWithTitle_action_keyEquivalent(self: *T, title: *String, selector: objc.SEL, keyEquivalent: *String) *MenuItem {
+                return objc.msgSend(*MenuItem, self, sel_addItemWithTitle_action_keyEquivalent_, .{ title, selector, keyEquivalent });
+            }
 
-    pub fn addItem(self: *Self, item: *MenuItem) void {
-        objc.msgSend(void, self, sel_addItem_, .{ item });
+            pub fn addItem(self: *T, item: *MenuItem) void {
+                objc.msgSend(void, self, sel_addItem_, .{ item });
+            }
+        };
     }
 };
 
 pub const MenuItem = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
     
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-    
-    // MenuItem methods
     pub fn separatorItem() *MenuItem {
         return objc.msgSend(*MenuItem, class_NSMenuItem, sel_separatorItem, .{});
     }
@@ -705,200 +478,115 @@ pub const MenuItem = opaque {
         return objc.msgSend(*MenuItem, class_NSMenuItem, sel_alloc, .{});
     }
 
-    pub fn init(self: *Self) *MenuItem {
-        return objc.msgSend(*MenuItem, self, sel_init, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn init(self: *T) *T {
+                return objc.msgSend(*T, self, sel_init, .{});
+            }
 
-    pub fn setKeyEquivalentModifierMask(self: *Self, modifierMask: KeyEquivalentModifierMask) void {
-        objc.msgSend(void, self, sel_setKeyEquivalentModifierMask_, .{ modifierMask });
-    }
+            pub fn setKeyEquivalentModifierMask(self: *T, modifierMask: KeyEquivalentModifierMask) void {
+                objc.msgSend(void, self, sel_setKeyEquivalentModifierMask_, .{ modifierMask });
+            }
 
-    pub fn keyEquivalentModifierMask(self: *Self) KeyEquivalentModifierMask {
-        return objc.msgSend(KeyEquivalentModifierMask, self, sel_keyEquivalentModifierMask, .{});
-    }
+            pub fn keyEquivalentModifierMask(self: *T) KeyEquivalentModifierMask {
+                return objc.msgSend(KeyEquivalentModifierMask, self, sel_keyEquivalentModifierMask, .{});
+            }
 
-    pub fn setSubmenu(self: *Self, submenu: *Menu) void {
-        objc.msgSend(void, self, sel_setSubmenu_, .{ submenu });
+            pub fn setSubmenu(self: *T, submenu: *Menu) void {
+                objc.msgSend(void, self, sel_setSubmenu_, .{ submenu });
+            }
+        };
     }
 };
 
 pub const Notification = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
     
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn name(self: *T) *String {
+                return objc.msgSend(*String, self, sel_name, .{});
+            }
 
-    pub fn isEqual(self: *Self, object_: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object_ });
-    }
+            pub fn object(self: *T) ?*Object {
+                return objc.msgSend(*Object, self, sel_object, .{});
+            }
 
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
+            // userInfo
+        };
     }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Notification methods
-    pub fn name(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_name, .{});
-    }
-
-    pub fn object(self: *Self) ?*Object {
-        return objc.msgSend(*Object, self, sel_object, .{});
-    }
-
-    // userInfo
 };
 
 pub const Object = opaque {
     const Self = @This();
-    
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
+    usingnamespace Methods(Self);
 
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn hash(self: *T) UInteger {
+                return objc.msgSend(UInteger, self, sel_hash, .{});
+            }
 
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
+            pub fn isEqual(self: *T, object: *Object) bool {
+                return objc.msgSend(bool, self, sel_isEqual_, .{ object });
+            }
 
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
+            pub fn description(self: *T) *String {
+                return objc.msgSend(*String, self, sel_description, .{});
+            }
 
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
+            pub fn debugDescription(self: *T) *String {
+                return objc.msgSend(*String, self, sel_debugDescription, .{});
+            }
 
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
+            pub fn retain(self: *T) *T {
+                return objc.msgSend(*T, self, sel_retain, .{});
+            }
 
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
+            pub fn release(self: *T) void {
+                objc.msgSend(void, self, sel_release, .{});
+            }
 
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
+            pub fn autorelease(self: *T) *T {
+                return objc.msgSend(void, self, sel_autorelease, .{});
+            }
+
+            pub fn retainCount(self: *T) UInteger {
+                return objc.msgSend(UInteger, self, sel_retainCount, .{});
+            }
+
+            pub fn copy(self: *Self) *Self {
+                return objc.msgSend(*Self, self, sel_copy, .{});
+            }
+        };
     }
 };
 
 pub const RunningApplication = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
     
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // RunningApplication methods
     pub fn currentApplication() *RunningApplication {
         return objc.msgSend(*RunningApplication, class_NSRunningApplication, sel_currentApplication, .{});
     }
 
-    pub fn localizedName(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_localizedName, .{});
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn localizedName(self: *T) *String {
+                return objc.msgSend(*String, self, sel_localizedName, .{});
+            }
+        };
     }
 };
 
 pub const String = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
 
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Copying methods
-    pub fn copy(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_copy, .{});
-    }
-
-    // String methods
     pub fn string() *String {
         return objc.msgSend(*String, class_NSString, sel_string, .{});
     }
@@ -919,175 +607,116 @@ pub const String = opaque {
         return objc.msgSend(*String, class_NSString, sel_alloc, .{});
     }
 
-    pub fn init(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_init, .{});
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn init(self: *T) *T {
+                return objc.msgSend(*T, self, sel_init, .{});
+            }
 
-    pub fn initWithString(self: *Self, str: *String) *String {
-        return objc.msgSend(*String, self, sel_initWithString_, .{ str });
-    }
+            pub fn initWithString(self: *T, str: *String) *T {
+                return objc.msgSend(*T, self, sel_initWithString_, .{ str });
+            }
 
-    pub fn initWithCString_encoding(self: *Self, str: [c]*const u8, encoding: StringEncoding) *String {
-        return objc.msgSend(*String, self, sel_initWithCString_encoding_, .{ str, encoding });
-    }
+            pub fn initWithCString_encoding(self: *T, str: [c]*const u8, encoding: StringEncoding) *T {
+                return objc.msgSend(*T, self, sel_initWithCString_encoding_, .{ str, encoding });
+            }
 
-    pub fn initWithZigString(self: *Self, str: [*:0]*const u8) *String {
-        return objc.msgSend(*String, self, sel_initWithCString_encoding_, .{ str, UTF8StringEncoding });
-    }
+            pub fn initWithZigString(self: *T, str: [*:0]*const u8) *T {
+                return objc.msgSend(*T, self, sel_initWithCString_encoding_, .{ str, UTF8StringEncoding });
+            }
 
-    // initWithBytesNoCopy_length_encoding_freeWhenDone_
+            // initWithBytesNoCopy_length_encoding_freeWhenDone_
 
-    pub fn characterAtIndex(self: *Self, index: UInteger) unichar {
-        return objc.msgSend(unichar, self, sel_characterAtIndex_, .{ index });
-    }
+            pub fn characterAtIndex(self: *T, index: UInteger) unichar {
+                return objc.msgSend(unichar, self, sel_characterAtIndex_, .{ index });
+            }
 
-    pub fn length(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_length, .{});
-    }
+            pub fn length(self: *T) UInteger {
+                return objc.msgSend(UInteger, self, sel_length, .{});
+            }
 
-    pub fn cStringUsingEncoding(self: *Self, encoding: StringEncoding) [c]*const u8 {
-        return objc.msgSend([c]*const u8, self, sel_cStringUsingEncoding_, .{ encoding });
-    }
+            pub fn cStringUsingEncoding(self: *T, encoding: StringEncoding) [c]*const u8 {
+                return objc.msgSend([c]*const u8, self, sel_cStringUsingEncoding_, .{ encoding });
+            }
 
-    pub fn utf8String(self: *Self) [*c]const u8 {
-        return objc.msgSend([*c]const u8, self, sel_utf8String, .{});
-    }
+            pub fn utf8String(self: *T) [*c]const u8 {
+                return objc.msgSend([*c]const u8, self, sel_utf8String, .{});
+            }
 
-    pub fn maximumLengthOfBytesUsingEncoding(self: *Self, encoding: StringEncoding) UInteger {
-        return objc.msgSend(UInteger, self, sel_maximumLengthOfBytesUsingEncoding_, .{ encoding });
-    }
+            pub fn maximumLengthOfBytesUsingEncoding(self: *T, encoding: StringEncoding) UInteger {
+                return objc.msgSend(UInteger, self, sel_maximumLengthOfBytesUsingEncoding_, .{ encoding });
+            }
 
-    pub fn lengthOfBytesUsingEncoding(self: *Self, encoding: StringEncoding) UInteger {
-        return objc.msgSend(UInteger, self, sel_lengthOfBytesUsingEncoding_, .{ encoding });
-    }
+            pub fn lengthOfBytesUsingEncoding(self: *T, encoding: StringEncoding) UInteger {
+                return objc.msgSend(UInteger, self, sel_lengthOfBytesUsingEncoding_, .{ encoding });
+            }
 
-    pub fn isEqualToString(self: *Self, str: *String) bool {
-        return objc.msgSend(bool, self, sel_isEqualToString_, .{ str });
-    }
+            pub fn isEqualToString(self: *T, str: *String) bool {
+                return objc.msgSend(bool, self, sel_isEqualToString_, .{ str });
+            }
 
-    // rangeOfString_options
+            // rangeOfString_options
 
-    pub fn fileSystemRepresentation(self: *Self) [c]*const u8 {
-        return objc.msgSend([c]*const u8, self, sel_fileSystemRepresentation, .{});
-    }
+            pub fn fileSystemRepresentation(self: *T) [c]*const u8 {
+                return objc.msgSend([c]*const u8, self, sel_fileSystemRepresentation, .{});
+            }
 
-    pub fn stringByAppendingString(self: *Self, str: *String) *String {
-        return objc.msgSend(*String, self, sel_stringByAppendingString_, .{ str });
+            pub fn stringByAppendingString(self: *T, str: *String) *String {
+                return objc.msgSend(*String, self, sel_stringByAppendingString_, .{ str });
+            }
+        };
     }
 };
 
 pub const Value = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
     
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Copying methods
-    pub fn copy(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_copy, .{});
-    }
-    
-    // Value methods
     pub fn valueWithPointer(pointer: *const anyopaque) *Value {
         return objc.msgSend(*Value, class_NSValue, sel_valueWithPointer_, .{pointer});
     }
 
-    pub fn pointerValue(self: *Self, comptime ReturnType: type) *ReturnType {
-        return objc.msgSend(*ReturnType, self, sel_pointerValue, .{});
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub fn pointerValue(self: *T, comptime ReturnType: type) *ReturnType {
+                return objc.msgSend(*ReturnType, self, sel_pointerValue, .{});
+            }
+        };
     }
 };
 
-extern fn initWithContentRect_styleMask_backing_defer_workaround(_ : *Window, _: objc.SEL, _:*const c.CGRect, _:WindowStyleMask, _:BackingStoreType, _:bool) callconv(.C) *Window;
-
 pub const Window = opaque {
     const Self = @This();
+    usingnamespace Object.Methods(Self);
+    usingnamespace Methods(Self);
 
-    // Object methods
-    pub fn hash(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_hash, .{});
-    }
-
-    pub fn isEqual(self: *Self, object: *Object) bool {
-        return objc.msgSend(bool, self, sel_isEqual_, .{ object });
-    }
-
-    pub fn description(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_description, .{});
-    }
-
-    pub fn debugDescription(self: *Self) *String {
-        return objc.msgSend(*String, self, sel_debugDescription, .{});
-    }
-
-    // Referencing methods
-    pub fn retain(self: *Self) *Self {
-        return objc.msgSend(*Self, self, sel_retain, .{});
-    }
-
-    pub fn release(self: *Self) void {
-        objc.msgSend(void, self, sel_release, .{});
-    }
-
-    pub fn autorelease(self: *Self) *Self {
-        return objc.msgSend(void, self, sel_autorelease, .{});
-    }
-
-    pub fn retainCount(self: *Self) UInteger {
-        return objc.msgSend(UInteger, self, sel_retainCount, .{});
-    }
-
-    // Window methods    
     pub fn alloc() *Window {
         return objc.msgSend(*Window, class_NSWindow, sel_alloc, .{});
     }
 
-    pub fn initWithContentRect_styleMask_backing_defer(self: *Self, contentRect: c.CGRect, style: WindowStyleMask, backingStoreType: BackingStoreType, defer_: bool) *Window {
-        //return objc.msgSend(*Window, self, sel_initWithContentRect_styleMask_backing_defer_, .{ contentRect, style, backingStoreType, defer_ });
-        return initWithContentRect_styleMask_backing_defer_workaround(self, sel_initWithContentRect_styleMask_backing_defer_, &contentRect, style, backingStoreType, defer_);
-    }
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            extern fn initWithContentRect_styleMask_backing_defer_workaround(_ : *T, _: objc.SEL, _:*const c.CGRect, _:WindowStyleMask, _:BackingStoreType, _:bool) callconv(.C) *T;
 
-    // setContentView
+            pub fn initWithContentRect_styleMask_backing_defer(self: *T, contentRect: c.CGRect, style: WindowStyleMask, backingStoreType: BackingStoreType, defer_: bool) *T {
+                //return objc.msgSend(*T, self, sel_initWithContentRect_styleMask_backing_defer_, .{ contentRect, style, backingStoreType, defer_ });
+                return initWithContentRect_styleMask_backing_defer_workaround(self, sel_initWithContentRect_styleMask_backing_defer_, &contentRect, style, backingStoreType, defer_);
+            }
 
-    pub fn makeKeyAndOrderFront(self: *Self, sender: ?*Object) void {
-        objc.msgSend(void, self, sel_makeKeyAndOrderFront_, .{ sender });
-    }
+            // setContentView
 
-    pub fn setTitle(self: *Self, title: *String) void {
-        objc.msgSend(void, self, sel_setTitle_, .{ title });
-    }
+            pub fn makeKeyAndOrderFront(self: *T, sender: ?*Object) void {
+                objc.msgSend(void, self, sel_makeKeyAndOrderFront_, .{ sender });
+            }
 
-    pub fn close(self: *Self) void {
-        objc.msgSend(void, self, sel_close, .{});
+            pub fn setTitle(self: *T, title: *String) void {
+                objc.msgSend(void, self, sel_setTitle_, .{ title });
+            }
+
+            pub fn close(self: *T) void {
+                objc.msgSend(void, self, sel_close, .{});
+            }
+        };
     }
 };
