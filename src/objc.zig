@@ -36,3 +36,7 @@ pub fn class(str: [:0]const u8) Class {
 pub fn selector(str: [:0]const u8) SEL {
     return c.sel_registerName(str).?;
 }
+
+pub fn addMethod(cls: Class, name: SEL, imp: IMP, types: [:0]const u8) bool {
+    return c.class_addMethod(cls, name, @ptrCast(fn () callconv(.C) void, imp), types);
+}

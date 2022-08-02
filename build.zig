@@ -13,9 +13,13 @@ pub fn build(b: *Builder) !void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("metal-zig", "src/main.zig");
+    const exe = b.addExecutable("metal-zig", "src/00-window.zig");
+    exe.addCSourceFile("src/abi_workarounds.c", &[_][]const u8 {});
+    //exe.emit_asm = std.build.LibExeObjStep.EmitOption.emit;
+    //exe.strip = true;
     exe.setTarget(target);
     exe.setBuildMode(mode);
+    exe.linkFramework("AppKit");
     exe.linkFramework("CoreFoundation");
     exe.linkFramework("CoreGraphics");
     exe.linkFramework("Metal");
