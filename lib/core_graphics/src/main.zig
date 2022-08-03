@@ -1,10 +1,9 @@
-pub const ns = @import("ns.zig");
-pub const objc = @import("objc.zig");
+pub const cg = @import("cg.zig");
 
 const std = @import("std");
 
 fn _init() void {
-    ns._foundation_init();
+    cg._init();
 }
 var global_once = std.once(_init);
 

@@ -113,9 +113,6 @@ pub fn _foundation_init() void {
 pub const unichar = u16;
 pub const Integer = isize;
 pub const UInteger = usize;
-pub const Point = c.CGPoint;
-pub const Size = c.CGSize;
-pub const Rect = c.CGRect;
 
 // TODO - how to do String constants
 pub const ErrorDomain = *String;
@@ -125,33 +122,33 @@ const OSStatusErrorDomain: ErrorDomain = undefined;
 const MachErrorDomain: ErrorDomain = undefined;
 
 pub const StringEncoding = UInteger;
-pub const ASCIIStringEncoding: UInteger = 1;
-pub const NEXTSTEPStringEncoding: UInteger = 2;
-pub const JapaneseEUCStringEncoding: UInteger = 3;
-pub const UTF8StringEncoding: UInteger = 4;
-pub const ISOLatin1StringEncoding: UInteger = 5;
-pub const SymbolStringEncoding: UInteger = 6;
-pub const NonLossyASCIIStringEncoding: UInteger = 7;
-pub const ShiftJISStringEncoding: UInteger = 8;
-pub const ISOLatin2StringEncoding: UInteger = 9;
-pub const UnicodeStringEncoding: UInteger = 10;
-pub const WindowsCP1251StringEncoding: UInteger = 11;
-pub const WindowsCP1252StringEncoding: UInteger = 12;
-pub const WindowsCP1253StringEncoding: UInteger = 13;
-pub const WindowsCP1254StringEncoding: UInteger = 14;
-pub const WindowsCP1250StringEncoding: UInteger = 15;
-pub const ISO2022JPStringEncoding: UInteger = 21;
-pub const MacOSRomanStringEncoding: UInteger = 30;
+pub const ASCIIStringEncoding = 1;
+pub const NEXTSTEPStringEncoding = 2;
+pub const JapaneseEUCStringEncoding = 3;
+pub const UTF8StringEncoding = 4;
+pub const ISOLatin1StringEncoding = 5;
+pub const SymbolStringEncoding = 6;
+pub const NonLossyASCIIStringEncoding = 7;
+pub const ShiftJISStringEncoding = 8;
+pub const ISOLatin2StringEncoding = 9;
+pub const UnicodeStringEncoding = 10;
+pub const WindowsCP1251StringEncoding = 11;
+pub const WindowsCP1252StringEncoding = 12;
+pub const WindowsCP1253StringEncoding = 13;
+pub const WindowsCP1254StringEncoding = 14;
+pub const WindowsCP1250StringEncoding = 15;
+pub const ISO2022JPStringEncoding = 21;
+pub const MacOSRomanStringEncoding = 30;
 pub const UTF16StringEncoding = UnicodeStringEncoding;
-pub const UTF16BigEndianStringEncoding: UInteger = 0x90000100;
-pub const UTF16LittleEndianStringEncoding: UInteger = 0x94000100;
-pub const UTF32StringEncoding: UInteger = 0x8c000100;
-pub const UTF32BigEndianStringEncoding: UInteger = 0x98000100;
-pub const UTF32LittleEndianStringEncoding: UInteger = 0x9c000100;
+pub const UTF16BigEndianStringEncoding = 0x90000100;
+pub const UTF16LittleEndianStringEncoding = 0x94000100;
+pub const UTF32StringEncoding = 0x8c000100;
+pub const UTF32BigEndianStringEncoding = 0x98000100;
+pub const UTF32LittleEndianStringEncoding = 0x9c000100;
 
 pub const Array = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
     usingnamespace Methods(Self);
 
     pub fn array() *Array {
@@ -170,6 +167,8 @@ pub const Array = opaque {
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub usingnamespace Super.Methods(T);
+
             pub fn init(self: *T) *T {
                 return objc.msgSend(*T, self, sel_init, .{});
             }
@@ -189,7 +188,7 @@ pub const Array = opaque {
 
 pub const AutoreleasePool = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
     usingnamespace Methods(Self);
 
     pub fn alloc() *AutoreleasePool {
@@ -198,6 +197,8 @@ pub const AutoreleasePool = opaque {
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub usingnamespace Super.Methods(T);
+
             pub fn init(self: *T) *T {
                 return objc.msgSend(*T, self, sel_init, .{});
             }
@@ -219,18 +220,25 @@ pub const AutoreleasePool = opaque {
 
 pub const Dictionary = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
+    usingnamespace Methods(Self);
 
-    // TODO
+    pub fn Methods(comptime T: type) type {
+        return struct {
+            pub usingnamespace Super.Methods(T);
+
+            // TODO
+        };
+    }
 };
 
 pub const Error = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
     usingnamespace Methods(Self);
 
-    pub fn errorWithDomain_code_userInfo(domain_: ErrorDomain, code_: Integer, userInfo_: *Dictionary) *Error {
-        return objc.msgSend(*Error, class_NSError, sel_errorWithDomain_code_userInfo_, .{ domain_, code_, userInfo_ });
+    pub fn errorWithDomain_code_userInfo(domain_: ErrorDomain, code_: Integer, user_info: *Dictionary) *Error {
+        return objc.msgSend(*Error, class_NSError, sel_errorWithDomain_code_userInfo_, .{ domain_, code_, user_info });
     }
 
     pub fn alloc() *Error {
@@ -239,12 +247,14 @@ pub const Error = opaque {
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub usingnamespace Super.Methods(T);
+
             pub fn init(self: *T) *T {
                 return objc.msgSend(*Error, self, sel_init, .{});
             }
 
-            pub fn initWithDomain_code_userInfo(self: *T, domain_: ErrorDomain, code_: Integer, userInfo_: *Dictionary) *T {
-                return objc.msgSend(*T, self, sel_initWithDomain_code_userInfo_, .{ domain_, code_, userInfo_ });
+            pub fn initWithDomain_code_userInfo(self: *T, domain_: ErrorDomain, code_: Integer, user_info: *Dictionary) *T {
+                return objc.msgSend(*T, self, sel_initWithDomain_code_userInfo_, .{ domain_, code_, user_info });
             }
 
             pub fn code(self: *T) Integer {
@@ -280,11 +290,13 @@ pub const Error = opaque {
 
 pub const Notification = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
     usingnamespace Methods(Self);
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub usingnamespace Super.Methods(T);
+
             pub fn name(self: *T) *String {
                 return objc.msgSend(*String, self, sel_name, .{});
             }
@@ -300,10 +312,21 @@ pub const Notification = opaque {
 
 pub const Object = opaque {
     const Self = @This();
+    pub const Super = void;
     usingnamespace Methods(Self);
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub fn cast(self: *T, comptime U: type) *U {
+                comptime {
+                    if (canUpcast(T, U) or canDowncast(T, U)) {
+                        return @ptrCast(*U, self);
+                    } else {
+                        @compileError("Unsafe cast from " ++ @typeName(T) ++ " to " ++ @typeName(U));
+                    }
+                }
+            }
+
             pub fn hash(self: *T) UInteger {
                 return objc.msgSend(UInteger, self, sel_hash, .{});
             }
@@ -345,7 +368,7 @@ pub const Object = opaque {
 
 pub const String = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
     usingnamespace Methods(Self);
 
     pub fn string() *String {
@@ -361,7 +384,7 @@ pub const String = opaque {
     }
 
     pub fn stringWithZigString(str: [*:0]const u8) *String {
-        return objc.msgSend(*String, class_NSString, sel_stringWithCString_encoding_, .{ str, UTF8StringEncoding });
+        return objc.msgSend(*String, class_NSString, sel_stringWithCString_encoding_, .{ str, @as(UInteger, UTF8StringEncoding) });
     }
 
     pub fn alloc() *String {
@@ -370,6 +393,8 @@ pub const String = opaque {
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub usingnamespace Super.Methods(T);
+
             pub fn init(self: *T) *T {
                 return objc.msgSend(*T, self, sel_init, .{});
             }
@@ -383,7 +408,7 @@ pub const String = opaque {
             }
 
             pub fn initWithZigString(self: *T, str: [*:0]*const u8) *T {
-                return objc.msgSend(*T, self, sel_initWithCString_encoding_, .{ str, UTF8StringEncoding });
+                return objc.msgSend(*T, self, sel_initWithCString_encoding_, .{ str, @as(UInteger, UTF8StringEncoding) });
             }
 
             // initWithBytesNoCopy_length_encoding_freeWhenDone_
@@ -431,7 +456,7 @@ pub const String = opaque {
 
 pub const Value = opaque {
     const Self = @This();
-    usingnamespace Object.Methods(Self);
+    pub const Super = Object;
     usingnamespace Methods(Self);
 
     pub fn valueWithPointer(pointer: *const anyopaque) *Value {
@@ -440,9 +465,31 @@ pub const Value = opaque {
 
     pub fn Methods(comptime T: type) type {
         return struct {
+            pub usingnamespace Super.Methods(T);
+
             pub fn pointerValue(self: *T, comptime ReturnType: type) *ReturnType {
                 return objc.msgSend(*ReturnType, self, sel_pointerValue, .{});
             }
         };
     }
 };
+
+fn canDowncast(comptime T: type, comptime U: type) bool {
+    if (T == U) {
+        return true;
+    } else if (U.Super != void) {
+        return canDowncast(T, U.Super);
+    } else {
+        return false;
+    }
+}
+
+fn canUpcast(comptime T: type, comptime U: type) bool {
+    if (T == U) {
+        return true;
+    } else if (T.Super != void) {
+        return canUpcast(T.Super, U);
+    } else {
+        return false;
+    }
+}

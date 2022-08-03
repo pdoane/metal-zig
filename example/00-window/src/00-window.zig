@@ -2,27 +2,41 @@ const std = @import("std");
 const foundation = @import("foundation");
 const app_kit = @import("app_kit");
 const metal = @import("metal");
+const metal_kit = @import("metal_kit");
 
 const objc = foundation.objc;
 const mtl = metal.mtl;
+const mtk = metal_kit.mtk;
 const ns = struct {
     usingnamespace foundation.ns;
     usingnamespace app_kit.ns;
 };
 
+var device: *mtl.Device = undefined;
+var command_queue: *mtl.CommandQueue = undefined;
+var window: *ns.Window = undefined;
+var mtkView: *mtk.View = undefined;
+var viewDelegate: mtk.ViewDelegate = undefined;
+
 pub fn main() void {
     foundation.init();
     app_kit.init();
     metal.init();
+    metal_kit.init();
 
     var autoreleasePool = ns.AutoreleasePool.alloc().init();
     defer autoreleasePool.release();
 
     var application = ns.Application.sharedApplication();
-    var del = ns.ApplicationDelegate{ .applicationWillFinishLaunching = applicationWillFinishLaunching, .applicationDidFinishLaunching = applicationDidFinishLaunching, .applicationShouldTerminateAfterLastWindowClosed = applicationShouldTerminateAfterLastWindowClosed };
+    var delegate = ns.ApplicationDelegate{ .applicationWillFinishLaunching = applicationWillFinishLaunching, .applicationDidFinishLaunching = applicationDidFinishLaunching, .applicationShouldTerminateAfterLastWindowClosed = applicationShouldTerminateAfterLastWindowClosed };
 
-    application.setDelegate(del);
+    application.setDelegate(delegate);
     application.run();
+
+    mtkView.release();
+    window.release();
+    command_queue.release();
+    device.release();
 }
 
 fn applicationWillFinishLaunching(notification: *ns.Notification) void {
@@ -37,8 +51,19 @@ fn applicationWillFinishLaunching(notification: *ns.Notification) void {
 fn applicationDidFinishLaunching(notification: *ns.Notification) void {
     const frame = ns.Rect{ .origin = ns.Point{ .x = 100.0, .y = 100.0 }, .size = ns.Size{ .width = 512.0, .height = 512.0 } };
 
-    var window = ns.Window.alloc().initWithContentRect_styleMask_backing_defer(frame, ns.WindowStyleMaskClosable | ns.WindowStyleMaskTitled, ns.BackingStoreBuffered, false);
+    window = ns.Window.alloc().initWithContentRect_styleMask_backing_defer(frame, ns.WindowStyleMaskClosable | ns.WindowStyleMaskTitled, ns.BackingStoreBuffered, false);
 
+    device = mtl.createSystemDefaultDevice().?;
+    command_queue = device.newCommandQueue().?;
+
+    mtkView = mtk.View.alloc().initWithFrame_device(frame, device);
+    mtkView.setColorPixelFormat(mtl.PixelFormatBGRA8Unorm_sRGB);
+    mtkView.setClearColor(mtl.ClearColor.init(1.0, 0.0, 0.0, 1.0));
+
+    viewDelegate = mtk.ViewDelegate{ .drawInMTKView = drawInMTKView, .drawableSizeWillChange = drawableSizeWillChange };
+    mtkView.setDelegate(viewDelegate);
+
+    window.setContentView(mtkView.cast(ns.View));
     window.setTitle(ns.String.stringWithZigString("00 - Window"));
 
     window.makeKeyAndOrderFront(null);
@@ -49,6 +74,22 @@ fn applicationDidFinishLaunching(notification: *ns.Notification) void {
 
 fn applicationShouldTerminateAfterLastWindowClosed(_: *ns.Application) bool {
     return true;
+}
+
+fn drawInMTKView(view: *mtk.View) void {
+    var pool = ns.AutoreleasePool.alloc().init();
+    defer pool.release();
+
+    var command_buffer = command_queue.commandBuffer().?;
+    var render_pass_descriptor = view.currentRenderPassDescriptor();
+    var encoder = command_buffer.renderCommandEncoderWithDescriptor(render_pass_descriptor);
+    encoder.endEncoding();
+    command_buffer.presentDrawable(view.currentDrawable().cast(mtl.Drawable));
+    command_buffer.commit();
+}
+
+fn drawableSizeWillChange(_: *mtk.View, _: ns.Size) void {
+    // TODO - should have a default implementation
 }
 
 fn createMenuBar() *ns.Menu {
