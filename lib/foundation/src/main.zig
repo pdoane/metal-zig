@@ -11,3 +11,9 @@ var global_once = std.once(_init);
 pub fn init() void {
     global_once.call();
 }
+
+test {
+    const refAllDecls = std.testing.refAllDecls;
+    refAllDecls(ns);
+    refAllDecls(objc);
+}
