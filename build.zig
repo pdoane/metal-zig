@@ -1,9 +1,5 @@
 const std = @import("std");
 
-const foundation = @import("lib/foundation/build.zig");
-const app_kit = @import("lib/app_kit/build.zig");
-const metal = @import("lib/metal/build.zig");
-
 const example_00_window = @import("example/00-window/build.zig");
 const example_compute_test = @import("example/compute_test/build.zig");
 

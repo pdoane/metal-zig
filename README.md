@@ -11,12 +11,14 @@ A low-overhead Zig interface for Metal.
 - Use generics with mixins to implement method inheritance
 - Enumerations as integer values
 - Selector name as function name with `:` -> `_` and trailing underscore removed
-- Prefix removed (`MTLDevice` -> `mtl.Device`)
+- Namspace prefix removed (`MTLDevice` -> `mtl.Device`)
+- Adds a `cast` method to ns.Object that provides some static safety guarantees
 
 ### Open questions
 
 - Optional vs errors for null values
-- How to cast between parent and subtypes?
 - Const doesn't seem to matter for opaque types?
-- Slices (e.g. array initialization from objects)
+- Zig slices or pointer/count (e.g. array initialization from objects)
 - String constants (e.g NSErrorDomain)
+- Delegate lifetimes
+- Why do function parameters get warning about shadowing struct fields

@@ -1,13 +1,13 @@
-pub const mtl = @import("mtl.zig");
+pub const ca = @import("ca.zig");
 
 const std = @import("std");
-const core_graphics = @import("core_graphics");
 const foundation = @import("foundation");
+const metal = @import("metal");
 
 fn _init() void {
-    core_graphics.init();
     foundation.init();
-    mtl._init();
+    metal.init();
+    ca._init();
 }
 var global_once = std.once(_init);
 

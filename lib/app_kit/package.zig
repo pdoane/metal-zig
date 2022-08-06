@@ -1,11 +1,12 @@
 const std = @import("std");
 
-const foundation = @import("../foundation/build.zig");
+const core_graphics = @import("../core_graphics/package.zig");
+const foundation = @import("../foundation/package.zig");
 
 pub const pkg = std.build.Pkg{
     .name = "app_kit",
     .source = .{ .path = thisDir() ++ "/src/main.zig" },
-    .dependencies = &[_]std.build.Pkg{foundation.pkg},
+    .dependencies = &[_]std.build.Pkg{ core_graphics.pkg, foundation.pkg },
 };
 
 pub fn link(exe: *std.build.LibExeObjStep) void {
