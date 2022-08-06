@@ -8,7 +8,7 @@ const lib_metal_kit = @import("lib/metal_kit/package.zig");
 const lib_quartz_core = @import("lib/quartz_core/package.zig");
 
 const example_00_window = @import("example/00-window/build.zig");
-const example_compute_test = @import("example/compute_test/build.zig");
+const example_01_primitive = @import("example/01-primitive/build.zig");
 
 pub fn example(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, exe: *std.build.LibExeObjStep, comptime name: []const u8) void {
     //exe.emit_asm = std.build.LibExeObjStep.EmitOption.emit;
@@ -53,7 +53,7 @@ pub fn build(b: *std.build.Builder) !void {
     const mode = b.standardReleaseOptions();
 
     example(b, target, mode, example_00_window.build(b), "00-window");
-    example(b, target, mode, example_compute_test.build(b), "compute_test");
+    example(b, target, mode, example_01_primitive.build(b), "01-primitive");
 
     const all_tests_step = b.step("test", "Run all tests");
     addTest(b, target, mode, all_tests_step, lib_app_kit);

@@ -146,6 +146,26 @@ pub const UTF32StringEncoding = 0x8c000100;
 pub const UTF32BigEndianStringEncoding = 0x98000100;
 pub const UTF32LittleEndianStringEncoding = 0x9c000100;
 
+pub const Range = extern struct {
+    location: UInteger,
+    length: UInteger,
+
+    pub fn init(loc: UInteger, len: UInteger) Range {
+        return Range{ .location = loc, .length = len };
+    }
+    pub fn equal(self: *const Range, range: Range) bool {
+        return (self.location == range.location) and (self.length == range.length);
+    }
+
+    pub fn locationInRange(self: *const Range, loc: UInteger) bool {
+        return (!(loc < self.location)) and ((loc - self.location) < self.length);
+    }
+
+    pub fn max(self: *const Range) UInteger {
+        return self.location + self.length;
+    }
+};
+
 pub const Array = opaque {
     const Self = @This();
     pub const Super = Object;
