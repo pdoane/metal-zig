@@ -33,6 +33,9 @@ var mtk_view: *mtk.View = undefined;
 var view_delegate: mtk.ViewDelegate = undefined;
 var device: *mtl.Device = undefined;
 var command_queue: *mtl.CommandQueue = undefined;
+var pso: *mtl.RenderPipelineState = undefined;
+var vertex_positions_buffer: *mtl.Buffer = undefined;
+var vertex_colors_buffer: *mtl.Buffer = undefined;
 
 pub fn main() void {
     foundation.init();
@@ -49,6 +52,9 @@ pub fn main() void {
     application.setDelegate(delegate);
     application.run();
 
+    vertex_positions_buffer.release();
+    vertex_colors_buffer.release();
+    pso.release();
     command_queue.release();
     device.release();
     mtk_view.release();
@@ -71,6 +77,8 @@ fn applicationDidFinishLaunching(notification: *ns.Notification) void {
 
     device = mtl.createSystemDefaultDevice().?;
     command_queue = device.newCommandQueue().?;
+    buildShaders();
+    buildBuffers();
 
     mtk_view = mtk.View.alloc().initWithFrame_device(frame, device);
     mtk_view.setColorPixelFormat(mtl.PixelFormatBGRA8Unorm_sRGB);
@@ -80,7 +88,7 @@ fn applicationDidFinishLaunching(notification: *ns.Notification) void {
     mtk_view.setDelegate(view_delegate);
 
     window.setContentView(mtk_view.cast(ns.View));
-    window.setTitle(ns.String.stringWithZigString("00 - Window"));
+    window.setTitle(ns.String.stringWithZigString("01 - Window"));
 
     window.makeKeyAndOrderFront(null);
 
@@ -92,6 +100,51 @@ fn applicationShouldTerminateAfterLastWindowClosed(_: *ns.Application) bool {
     return true;
 }
 
+fn buildShaders() void {
+    const shaderSrc = @embedFile("01-primitive.metal");
+
+    var err: ?*ns.Error = undefined;
+    var library = device.newLibraryWithSource_options_error(ns.String.stringWithZigString(shaderSrc), null, &err) orelse {
+        std.log.info("{s}", .{err.?.localizedDescription().utf8String()});
+        return;
+    };
+    defer library.release();
+
+    var vertex_fn = library.newFunctionWithName(ns.String.stringWithZigString("vertexMain")).?;
+    defer vertex_fn.release();
+    var frag_fn = library.newFunctionWithName(ns.String.stringWithZigString("fragmentMain")).?;
+    defer frag_fn.release();
+
+    var desc = mtl.RenderPipelineDescriptor.alloc().init();
+    defer desc.release();
+
+    desc.setVertexFunction(vertex_fn);
+    desc.setFragmentFunction(frag_fn);
+    desc.colorAttachments().objectAtIndexedSubscript(0).setPixelFormat(mtl.PixelFormatBGRA8Unorm_sRGB);
+
+    pso = device.newRenderPipelineStateWithDescriptor_error_(desc, &err) orelse {
+        std.log.info("{s}", .{err.?.localizedDescription().utf8String()});
+        return;
+    };
+}
+
+fn buildBuffers() void {
+    const Float3 = @Vector(3, f32);
+
+    const positions = [_]Float3{ Float3{ -0.8, 0.8, 0.0 }, Float3{ 0.0, -0.8, 0.0 }, Float3{ 0.8, 0.8, 0.0 } };
+    const colors = [_]Float3{ Float3{ 1.0, 0.0, 0.0 }, Float3{ 0.0, 1.0, 0.0 }, Float3{ 0.0, 0.0, 1.0 } };
+
+    vertex_positions_buffer = device.newBufferWithLength_options(@sizeOf(@TypeOf(positions)), mtl.ResourceStorageModeManaged).?;
+    vertex_colors_buffer = device.newBufferWithLength_options(@sizeOf(@TypeOf(colors)), mtl.ResourceStorageModeManaged).?;
+
+    // TODO - better way to write this?
+    std.mem.copy(Float3, vertex_positions_buffer.contents(Float3)[0..3], positions[0..3]);
+    std.mem.copy(Float3, vertex_colors_buffer.contents(Float3)[0..3], colors[0..3]);
+
+    vertex_positions_buffer.didModifyRange(ns.Range.init(0, vertex_positions_buffer.length()));
+    vertex_colors_buffer.didModifyRange(ns.Range.init(0, vertex_colors_buffer.length()));
+}
+
 fn drawInMTKView(view: *mtk.View) void {
     var pool = ns.AutoreleasePool.alloc().init();
     defer pool.release();
@@ -99,6 +152,10 @@ fn drawInMTKView(view: *mtk.View) void {
     var command_buffer = command_queue.commandBuffer().?;
     var render_pass_descriptor = view.currentRenderPassDescriptor();
     var encoder = command_buffer.renderCommandEncoderWithDescriptor(render_pass_descriptor).?;
+    encoder.setRenderPipelineState(pso);
+    encoder.setVertexBuffer_offset_atIndex(vertex_positions_buffer, 0, 0);
+    encoder.setVertexBuffer_offset_atIndex(vertex_colors_buffer, 0, 1);
+    encoder.drawPrimitives_vertexStart_vertexCount(mtl.PrimitiveTypeTriangle, 0, 3);
     encoder.endEncoding();
     command_buffer.presentDrawable(view.currentDrawable().cast(mtl.Drawable));
     command_buffer.commit();

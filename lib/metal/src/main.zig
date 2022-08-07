@@ -16,6 +16,7 @@ pub fn init() void {
 }
 
 test {
+    @setEvalBranchQuota(10000);
     const refAllDecls = std.testing.refAllDecls;
     refAllDecls(mtl);
 }
